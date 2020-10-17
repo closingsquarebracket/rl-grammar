@@ -8,7 +8,7 @@ class BaseEnvironment:
 
      step(action), which translates the incoming action to an observation (the current
      state after the action), a reward (how successful that action was), done (a signal
-     wether the game is finished) and an info, used for debugging.
+     whether the game is finished) and an info, used for debugging.
 
      reset(), resetting the environment and all variables to their default values. It returns
      the initial observation for the environment.
