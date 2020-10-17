@@ -2,7 +2,7 @@ import numpy as np
 
 
 class BaseEnvironment:
-    """Base Environment for any environment. 
+    """Base Environment for any environment.
 
     Implements the following functions:
 

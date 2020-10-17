@@ -132,7 +132,10 @@
 
 Machine learning approaches to text generation try to replicate a given text, for example by predicting the next word for a sentence. While the results can be interesting, this approach has obvious limitations.\cite{Lau2020} Text can also be generated from structured information, such as information about somebody's life.\cite{lebret2020} These approaches have the drawback that the machines only learns to imitate, in the sense that it reduces the distance between the generated text and the truth. In this project, I want to explore whether a reinforcement learning approach provides different results.
 
-Instead of attempting to generate text by imitation, we can check a generated solution for its correctness. This is done by implementing grammar, vocabulary and further checks in the environments that the machine interacts with. As an example, part of the environment might be responsible for evaluating word order, another for measuring word variations.
+Instead of attempting to generate text by imitation, we can check a generated solution for its correctness. This is done by implementing grammar, vocabulary and further checks in the environments that the machine interacts with. As an example, part of the environment might be responsible for evaluating word order, another for measuring word variations. Text is useful because it is easily verified by humans, compared to game solving strategies. It also allows for a wide variety of possible solutions. "The quick brown fox jumps over the lazy dog" is equally grammatically valid as "the lazy dog is jumped over by the quick brown fox".
+
+\section{Implementation}
+
 
 
 
