@@ -130,7 +130,7 @@
 
 \section{Goal of this project}
 
-Machine learning approaches to text generation try to replicate a given text, for example by predicting the next word for a sentence. While the results can be interesting, this approach has obvious limitations.\cite{Lau2020} Text can also be generated from structured information, such as information about somebody's life.\cite{lebret2020} These approaches have the drawback that the machines only learns to imitate, in the sense that it reduces the distance between the generated text and the truth. This well-put in an article by Karpathy\cite{karpathy2015} and its response\cite{goldberg2015}. In this project, I want to explore whether a reinforcement learning approach provides different results.
+Machine learning approaches to text generation try to replicate a given text, for example by predicting the next word for a sentence. While the results can be interesting, this approach has obvious limitations.\cite{lau2020} Text can also be generated from structured information, such as information about somebody's life.\cite{lebret2010} These approaches have the drawback that the machines only learns to imitate, in the sense that it reduces the distance between the generated text and the truth. This well-put in an article by Karpathy\cite{karpathy2015} and its response\cite{goldberg2015}. In this project, I want to explore whether a reinforcement learning approach provides different results.
 
 Instead of attempting to generate text by imitation, we can check a generated solution for its correctness. This is done by implementing grammar, vocabulary and further checks in the environments that the machine interacts with. As an example, part of the environment might be responsible for evaluating word order, another for measuring word variations. Text is useful because it is easily verified by humans, compared to game solving strategies. It also allows for a wide variety of possible solutions. "The quick brown fox jumps over the lazy dog" is equally grammatically valid as "the lazy dog is jumped over by the quick brown fox".
 
@@ -198,11 +198,16 @@ level 2/.style={sibling distance=1em}, level distance=4cm]]
 \end{figure}
 Moving between states can give different paths to the same state (for example "spam spam bacon"), but the reward derived from it should be the same.\footnote{The Environment is ignorant of its previous states and keeps no memory.} 
 
+\subsection{Agent}
 
-\begin{thebibliography}{99}
-\bibitem{lebret2010} Lebret, Grangier, Auli: \emph{Neural Text Generation from Structured Data with Application to the Biography Domain} \url{https://research.fb.com/wp-content/uploads/2017/02/neural-text-generation-emnlp-camera-ready.pdf}
-\bibitem{Lau2020} Lau, Cohn, Baldwin, Hammond \emph{This AI Poet Mastered Rhythm, Rhyme, and Natural Language to Write Like Shakespeare} \url{https://spectrum.ieee.org/artificial-intelligence/machine-learning/this-ai-poet-mastered-rhythm-rhyme-and-natural-language-to-write-like-shakespeare}
-\bibitem{karpathy2015} Karpathy: \emph{The Unreasonable Effectiveness of Recurrent Neural Networks} \url{http://karpathy.github.io/2015/05/21/rnn-effectiveness/}
-\bibitem{goldberg2015} Goldberg, \emph{The unreasonable effectiveness of Character-level Language Models}\url{https://nbviewer.jupyter.org/gist/yoavg/d76121dfde2618422139}
-\end{thebibliography}
+The Agent is a program that interacts with the environment and learns from it. The Agent receives information from the Environment – The current sentence and its associated quality in the form a reward. By building experience through interaction, the Agent can build a model of the environment and move towards higher rewards.
+
+In order to learn from the Environment, the Agent needs two things: Interaction, and memory of the best actions. Initially the Agent is clueless about its surrounding and needs to explore. Since there is no information available, the best action is to explore randomly. The interactions and their results are stored and as a random string of interactions leads to positive results, the machine starts to learn from its environment.\cite{thomas2018}
+
+\section{Implementation}
+
+
+
+\bibliography{project_bibliography}
+\bibliographystyle{plainnat}
 \end{document}

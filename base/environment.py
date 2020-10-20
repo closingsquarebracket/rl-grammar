@@ -28,9 +28,7 @@ class BaseEnvironment:
         # be zero whereas an ideal state should be one.
         self.done = False
         # The done signal relates to the fact whether a game has finished.
-        self.info = None
-        # info can be used for debugging purposes. It is passed on to the
-        # agent during stepping.
+        self.info = None  # info can be used for debugging purposes. It is passed on to the  # agent during stepping.
 
     def step(self, action: np.ndarray):
         """The action is the output of the agent and will usually be either a one-hot vector
@@ -76,3 +74,37 @@ class BaseModel:
         of the Model."""
         property_value = None
         return property_value
+
+
+class GrammarEnvironment(BaseEnvironment):
+    """Central environment for evaluating sentences."""
+
+    def __init__(self, *models):
+        """Models are instantiated outside of the Environment and passed as a BaseModel class instance.
+        Models need to implement a .predict function. """
+        super(GrammarEnvironment, self).__init__()
+        self.models = models
+
+    def action_to_state(self, action):
+        """TODO: Implement a function that transfers from the action of the agent to a change in state."""
+        raise NotImplementedError
+
+    def group_rewards(self, rewards: list) -> float:
+        """TODO: Find a way to group the rewards of the models together to a single float value representing the state reward."""
+        raise NotImplementedError
+
+    def step(self, action: np.ndarray):
+        observation, _, done, info = super(GrammarEnvironment, self).step(action)
+
+        self.current_state = self.action_to_state(action)
+        rewards = [model.evaluate(self.current_state) for model in self.models]
+        reward = self.group_rewards(rewards)
+
+        return observation, reward, done, info
+
+
+class SentenceLengthModel(BaseModel):
+    """Measures the length of a state."""
+
+    def predict(self, state):
+        return len(state)
