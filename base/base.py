@@ -76,35 +76,3 @@ class BaseModel:
         return property_value
 
 
-class GrammarEnvironment(BaseEnvironment):
-    """Central environment for evaluating sentences."""
-
-    def __init__(self, *models):
-        """Models are instantiated outside of the Environment and passed as a BaseModel class instance.
-        Models need to implement a .predict function. """
-        super(GrammarEnvironment, self).__init__()
-        self.models = models
-
-    def action_to_state(self, action):
-        """TODO: Implement a function that transfers from the action of the agent to a change in state."""
-        raise NotImplementedError
-
-    def group_rewards(self, rewards: list) -> float:
-        """TODO: Find a way to group the rewards of the models together to a single float value representing the state reward."""
-        raise NotImplementedError
-
-    def step(self, action: np.ndarray):
-        observation, _, done, info = super(GrammarEnvironment, self).step(action)
-
-        self.current_state = self.action_to_state(action)
-        rewards = [model.evaluate(self.current_state) for model in self.models]
-        reward = self.group_rewards(rewards)
-
-        return observation, reward, done, info
-
-
-class SentenceLengthModel(BaseModel):
-    """Measures the length of a state."""
-
-    def predict(self, state):
-        return len(state)

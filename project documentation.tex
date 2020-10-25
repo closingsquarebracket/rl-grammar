@@ -134,7 +134,7 @@ Machine learning approaches to text generation try to replicate a given text, fo
 
 Instead of attempting to generate text by imitation, we can check a generated solution for its correctness. This is done by implementing grammar, vocabulary and further checks in the environments that the machine interacts with. As an example, part of the environment might be responsible for evaluating word order, another for measuring word variations. Text is useful because it is easily verified by humans, compared to game solving strategies. It also allows for a wide variety of possible solutions. "The quick brown fox jumps over the lazy dog" is equally grammatically valid as "the lazy dog is jumped over by the quick brown fox".
 
-\section{Implementation}
+\section{Basic structure}
 
 There are two parts to reinforcement learning, the agent and an environment. The agent interacts with the environment and receives feedback from it. Conversely, the environment receives input from the agent to change and evaluates the new state. The result of the evaluation is passed back to the agent and forms the basis for its learning.
 
@@ -205,6 +205,19 @@ The Agent is a program that interacts with the environment and learns from it. T
 In order to learn from the Environment, the Agent needs two things: Interaction, and memory of the best actions. Initially the Agent is clueless about its surrounding and needs to explore. Since there is no information available, the best action is to explore randomly. The interactions and their results are stored and as a random string of interactions leads to positive results, the machine starts to learn from its environment.\cite{thomas2018}
 
 \section{Implementation}
+
+\subsection{Basic interaction}\marginnote{Version 1}
+
+A first version of the grammar environment is implemented in \texttt{grammar\_v1.py}. The agent interacts through \texttt{.step(action)}. The environment assumes that \texttt{action} is composed of a choice and a word vector. The choice is a one-hot encoding of the following options:
+\begin{itemize}
+\item[0]{Replace the word vector at the current position}
+\item[1]{Move the cursor position towards the negative without changing the word vector, to a maximum of $-1$.}
+\item[2]{Move the cursor position towards the positive without changing the word vector, to a maximum of \texttt{current word length} $+1$.}
+\item[3]{End the current interaction with the environment.}
+\end{itemize}
+There is no check on the length of the one-hot vector, meaning that the last option (3) can be ignored. The encoding is read with an argmax, the values do not have to sum up to $1$. Indices above 3 lead to an \texttt{NotImplementedError}.
+
+
 
 
 
