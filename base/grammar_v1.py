@@ -1,5 +1,6 @@
-import numpy as np
 from collections import deque
+
+import numpy as np
 
 from base.base import BaseEnvironment
 
@@ -103,4 +104,9 @@ class GrammarEnvironment(BaseEnvironment):
             self.done = True
         return observation, reward, done, info
 
+
+if __name__ == '__main__':
+    from models import SentenceLenthModel
+    sentence_length_model = SentenceLenthModel(30)
+    grammar_environment = GrammarEnvironment(sentence_length_model)
 
