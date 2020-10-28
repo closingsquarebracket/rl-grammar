@@ -21,7 +21,10 @@ class WordList:
         elif self.position == len(self.data) + 1:
             self.data.append(vector)
         else:
-            self.data[self.position] = vector
+            if len(self.data) == 0:
+                self.data.append(vector)
+            else:
+                self.data[self.position] = vector
 
     def left(self):
         self.position -= 1
@@ -34,7 +37,7 @@ class WordList:
     def __len__(self):
         return len(self.data)
 
-    def __call__(self, *args, **kwargs):
+    def extract(self):
         return list(self.data)
 
 class GrammarEnvironment(BaseEnvironment):
@@ -50,6 +53,7 @@ class GrammarEnvironment(BaseEnvironment):
         self.max_changes = change_steps
 
     def action_to_state(self, choice, vector):
+        """Converts an unpacked choice to a change on a WordList, using the vector where appropriate."""
         choice = int(np.argmax(choice))
         if choice == 0:
             self.current_sentence.assign(vector)
@@ -63,12 +67,11 @@ class GrammarEnvironment(BaseEnvironment):
             raise NotImplementedError("Only four types of actions available in GrammarEnvironment."
                                       f"Received: {choice} of type {type(choice)}."
                                       "Action needs to be encoded as one-hot.")
-        return self.current_sentence() # convert to list
+        return self.current_sentence
 
 
     def group_rewards(self, rewards: list) -> float:
-        """TODO: Find a way to group the rewards of the models together to a single float value representing the state reward."""
-        raise NotImplementedError
+        return sum(rewards)/len(rewards) # simple average as a start
 
     def step(self, action: [list, dict]):
         """The action is expected to contain two components: A choice of action indicating whether a word is replaced,
@@ -80,6 +83,10 @@ class GrammarEnvironment(BaseEnvironment):
         2: Move cursor left (ignores given word-vector)
         3: Move cursor right (ignores given word-vector)
         4: Finish current game (ignores given word-vector)"""
+        observation, reward, done, info = super(GrammarEnvironment, self).step(action) # all outcomes need to replaced
+
+
+        ### unpack incoming action
         if type(action) == list:
             choice_of_action = action[0]
             word_vector = action[1]
@@ -90,23 +97,40 @@ class GrammarEnvironment(BaseEnvironment):
             raise TypeError("The step in the GrammarEnvironment needs to be either a list or a dict (with 'action' and "
                             f"'vector' as possible entries). Received: {type(action)}")
 
-        observation, _, done, info = super(GrammarEnvironment, self).step(action)
-
+        ### perform action and change state
         self.current_state = self.action_to_state(choice_of_action, word_vector)
 
-        observation = self.current_state
+        ### prepare observation
+        vectors = self.current_state.extract() # convert into a list
+        word_length = len(self.current_state)
+        position = self.current_state.position
+        one_hot_position = one_hot(word_length, position)
+        observation = [vectors, one_hot_position]
 
-        rewards = [model.evaluate(self.current_state) for model in self.models]
+        ### prepare rewards
+        rewards = [model.predict(self.current_state) for model in self.models]
         reward = self.group_rewards(rewards)
 
+        ### adjust step counter
         self.change_steps += 1
         if self.change_steps >= self.max_changes:
             self.done = True
+
+        ### retrieve done value from the action
+        done = self.done
+
+        ### provide basic debug output
+        info = {'current step': self.change_steps}
         return observation, reward, done, info
 
 
+def one_hot(length, position) -> np.ndarray:
+    vector = np.zeros((1, length)) # shape in preparation for concatenation
+    vector[position] = 1
+    return vector
+
 if __name__ == '__main__':
-    from models import SentenceLenthModel
-    sentence_length_model = SentenceLenthModel(30)
+    from base.models import SentenceLengthModel
+    sentence_length_model = SentenceLengthModel(30)
     grammar_environment = GrammarEnvironment(sentence_length_model)
 
