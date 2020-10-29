@@ -108,7 +108,7 @@ class GrammarEnvironment(BaseEnvironment):
         observation = [vectors, one_hot_position]
 
         ### prepare rewards
-        rewards = [model.predict(self.current_state) for model in self.models]
+        rewards = [model.predict([vectors, position]) for model in self.models]
         reward = self.group_rewards(rewards)
 
         ### adjust step counter
