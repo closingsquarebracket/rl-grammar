@@ -32,12 +32,12 @@ class WordVectorAccuracy(BaseModel):
 
         self.word_vectors = word_vectors
         # normalize all vectors for consistency
-        self.word_vectors /= np.sum(self.word_vectors, axis = 1, keepdims = True)
+        self.word_vectors /= np.linalg.norm(self.word_vectors, axis = 1, keepdims = True)
 
     def predict(self, state) -> float:
         vectors, position = state
         current_vector = vectors[position]
-        current_vector /= np.sum(current_vector) # normalize before using
+        current_vector /= np.linalg.norm(current_vector, keepdims = True) # normalize before using
         accuracy = np.max(np.dot(self.word_vectors, current_vector))  # find closest match, then return the cos(angle)
         return accuracy # range: -1 to 1, with 1 ≘ full alignment, -1 ≘ antiparallel, 0 ≘ orthogonality.
 
