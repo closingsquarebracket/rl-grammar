@@ -3,11 +3,11 @@ import numpy as np
 from base.base import BaseModel
 
 
-class SentenceLengthModel(BaseModel):
+class SentenceLength(BaseModel):
     """Measures the difference to a target length"""
 
     def __init__(self, target_length, width: [None, int, float] = None):
-        super(SentenceLengthModel, self).__init__()
+        super(SentenceLength, self).__init__()
         self.property_size = 1
         self.target_length = target_length
         if not width:
