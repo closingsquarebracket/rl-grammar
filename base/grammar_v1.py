@@ -6,10 +6,32 @@ from base.base import BaseEnvironment
 
 __author__ = """closingsquarebracket"""
 __version__ = """1.0"""
-__doc__ = """Grammar environment"""
+__doc__ = """Grammar environment version 1. Simple model based on a list of words or word vectors. Models that provide
+a reward are provided externally (base.models). """
+
 
 class WordList:
-    """Deque-based list for holding words in a row. Provides basic over-index protection."""
+    """Deque-based list for holding words in a row. Provides basic over-index protection. The position of the current
+    index is tracked within the wordlist and can be extracted with WordList.position.
+
+    The data structure is based on a collections.deque for fast modification on both ends. Data can be retrieved
+    through WordList.data (type == deque) or through extract (type == list).
+
+    Sample use case:
+    >>>word_list = WordList()
+    >>>word_list.left()
+    >>>word_list.extract()
+    ...[]
+    >>>word_list.assign('a') # no type protection
+    >>>word_list.assign('b')
+    >>>word_list.extract()
+    ...['b'] # assign does not move the index position
+    >>>word_list.left()
+    >>>word_list.assign('c')
+    >>>word_list.extract()
+    ...['c'. 'b']
+    """
+
     def __init__(self):
         self.data = deque()
         self.position = 0
@@ -17,7 +39,7 @@ class WordList:
     def assign(self, vector):
         if self.position == -1:
             self.data.appendleft(vector)
-            self.position += 1 # reset to zero position
+            self.position += 1  # reset to zero position
         elif self.position == len(self.data) + 1:
             self.data.append(vector)
         else:
@@ -40,8 +62,14 @@ class WordList:
     def extract(self):
         return list(self.data)
 
+    def clear(self):
+        self.data.clear()
+
+
 class GrammarEnvironment(BaseEnvironment):
-    """Central environment for evaluating sentences."""
+    """Central environment for evaluating sentences.
+
+    Sentences are stored in a word_list instance."""
 
     def __init__(self, *models, change_steps = 200):
         """Models are instantiated outside of the Environment and passed as a BaseModel class instance.
@@ -69,9 +97,8 @@ class GrammarEnvironment(BaseEnvironment):
                                       "Action needs to be encoded as one-hot.")
         return self.current_sentence
 
-
     def group_rewards(self, rewards: list) -> float:
-        return sum(rewards)/len(rewards) # simple average as a start
+        return sum(rewards) / len(rewards)  # simple average as a start
 
     def step(self, action: [list, dict]):
         """The action is expected to contain two components: A choice of action indicating whether a word is replaced,
@@ -83,8 +110,7 @@ class GrammarEnvironment(BaseEnvironment):
         2: Move cursor left (ignores given word-vector)
         3: Move cursor right (ignores given word-vector)
         4: Finish current game (ignores given word-vector)"""
-        observation, reward, done, info = super(GrammarEnvironment, self).step(action) # all outcomes need to replaced
-
+        observation, reward, done, info = super(GrammarEnvironment, self).step(action)  # all outcomes need to replaced
 
         ### unpack incoming action
         if type(action) == list:
@@ -101,7 +127,7 @@ class GrammarEnvironment(BaseEnvironment):
         self.current_state = self.action_to_state(choice_of_action, word_vector)
 
         ### prepare observation
-        vectors = self.current_state.extract() # convert into a list
+        vectors = self.current_state.extract()  # convert into a list
         word_length = len(self.current_state)
         position = self.current_state.position
         one_hot_position = one_hot(word_length, position)
@@ -125,12 +151,13 @@ class GrammarEnvironment(BaseEnvironment):
 
 
 def one_hot(length, position) -> np.ndarray:
-    vector = np.zeros((1, length)) # shape in preparation for concatenation
+    vector = np.zeros((1, length))  # shape in preparation for concatenation
     vector[position] = 1
     return vector
 
-if __name__ == '__main__':
-    from base.models import SentenceLengthModel
-    sentence_length_model = SentenceLengthModel(30)
-    grammar_environment = GrammarEnvironment(sentence_length_model)
 
+if __name__ == '__main__':
+    from base.models import SentenceLength
+
+    sentence_length_model = SentenceLength(30)
+    grammar_environment = GrammarEnvironment(sentence_length_model)
